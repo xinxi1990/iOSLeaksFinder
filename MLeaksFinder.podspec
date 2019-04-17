@@ -25,12 +25,12 @@ Pod::Spec.new do |s|
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
   s.license          = 'MIT'
   s.author           = { "Zeposhe" => "xinxi1990@163.com" }
-  s.source           = { :git => "https://github.com/xinxi1990/iOSLeaksFinder.git", :tag => s.version }
+  s.source           = { :git => "https://github.com/xinxi1990/iOSLeaksFinder.git", :tag => "v2.0" }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '6.0'
 
-  s.source_files = 'iOSLeaksFinder/**/*'
+  s.source_files = '/Users/xinxi/Documents/iOSProject/MLeaksFinder/**/*'
   
   # s.resource_bundles = {
   #   'MLeaksFinder' => ['MLeaksFinder/Assets/*.png']
