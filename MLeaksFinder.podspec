@@ -21,16 +21,16 @@ Pod::Spec.new do |s|
 #TODO: Add long description of the pod here.
 #                       DESC
 
-  s.homepage         = "https://github.com/xinxi1990/iOSLeaksFinder"
+  s.homepage         = "https://github.com/Zepo/MLeaksFinder"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
   s.license          = 'MIT'
-  s.author           = { "Zeposhe" => "xinxi1990@163.com" }
-  s.source           = { :git => "https://github.com/xinxi1990/iOSLeaksFinder.git", :tag => "v2.0" }
+  s.author           = { "Zeposhe" => "zeposhe@163.com" }
+  s.source           = { :git => "https://github.com/Zepo/MLeaksFinder.git", :tag => s.version }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '6.0'
 
-  s.source_files = '/Users/xinxi/Documents/iOSProject/MLeaksFinder/**/*'
+  s.source_files = 'MLeaksFinder/**/*'
   
   # s.resource_bundles = {
   #   'MLeaksFinder' => ['MLeaksFinder/Assets/*.png']
