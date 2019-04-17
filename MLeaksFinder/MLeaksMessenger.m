@@ -12,14 +12,12 @@
 
 
 #import "MLeaksMessenger.h"
-#import "AFNetworking.h"
-
 
 static __weak UIAlertView *alertView;
 
 @implementation MLeaksMessenger
 
-static NSString * leakSavePath =  @"http://127.0.0.1:5000/leak/leaksave";;
+static NSString * leakSavePath =  @"https://backend.luojilab.com/leak/leaksave";
 
 
 + (void)alertWithTitle:(NSString *)title message:(NSString *)message {
@@ -37,54 +35,107 @@ static NSString * leakSavePath =  @"http://127.0.0.1:5000/leak/leaksave";;
                                                   cancelButtonTitle:@"OK"
                                                   otherButtonTitles:additionalButtonTitle, nil];
     [alertViewTemp show];
+    //弹出alert提示
     alertView = alertViewTemp;
     
     NSLog(@"%@: %@", title, message);
     NSLog(@"leak%@: %@", title, message);
     // 此处应该上报内存泄漏
+    NSString*class_name= [self getClassName:message];
     NSString *leak_detail = [NSString stringWithFormat:@"%@", message];
-    NSDictionary *params = @{@"class_name":@"class_name", @"pkg_name":@"com.luojilab.LuoJiFM-IOS",
+    NSDictionary *params = @{@"class_name":class_name, @"pkg_name":@"com.luojilab.LuoJiFM-IOS",
                              @"pkg_ver":@"0.0.0", @"leak_detail":leak_detail,
-                             @"os_version":@"12.0.1",@"device_name":@"iPhone X",@"uid":@"99999"};
+                             @"os_version":@"12.0.1",@"device_name":@"iPhone X",@"uid":@"000000"};
     [self sendLeakResult:params];
 }
 
 
+/**
+ *  发送内存泄漏数据到测试平台
+ **/
++ (void)sendLeakResult:(NSDictionary *)params{
+    
+    NSLog(@"发送请求url=%@,params=%@",leakSavePath,params);
+    NSDictionary *headers = @{ @"Content-Type": @"application/json"};
+    NSData *postData = [NSJSONSerialization dataWithJSONObject:params options:0 error:nil];
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:leakSavePath]
+                                                           cachePolicy:NSURLRequestUseProtocolCachePolicy
+                                                       timeoutInterval:10.0];
+    [request setHTTPMethod:@"POST"];
+    [request setAllHTTPHeaderFields:headers];
+    [request setHTTPBody:postData];
+    
+    NSURLSession *session = [NSURLSession sharedSession];
+    NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:request
+                                                completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                                                    if (error) {
+                                                        NSLog(@"leakerror%@", error);
+                                                    } else {
+                                                        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
+                                                        NSLog(@"leakresponse%@", httpResponse);
+                                                    }
+                                                }];
+    [dataTask resume];
+    
+}
+
 
 /**
-*  发送内存泄漏数据到测试平台
-**/
-+ (void)sendLeakResult:(NSDictionary *)params{
-    // 请求头
-    // 请求参数字典
-    NSLog(@"发送请求url=%@,params=%@",leakSavePath,params);
-    
-    AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
-    
-    NSMutableURLRequest *request = [[AFJSONRequestSerializer serializer] requestWithMethod:@"POST" URLString:leakSavePath parameters:params error:nil];
-    request.timeoutInterval = 10.f;
-    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    [request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
-    
-    NSURLSessionDataTask *task = [manager dataTaskWithRequest:request completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
-        NSLog(@"-----leak responseObject-----",responseObject);
-        NSHTTPURLResponse * responses = (NSHTTPURLResponse *)task.response;
-        if (!error && responses.statusCode == 200) {
-            if ([responseObject isKindOfClass:[NSDictionary class]]) {
-                // 请求成功数据处理
-                NSString *codeStr = responseObject[@"code"];
-                if (codeStr == 0){
-                     NSLog(@"-----leak data send success!-----");
-                }
-            } else {
-                
-            }
-        } else {
-            NSLog(@"请求失败error=%@", error);
-        }
-    }];
-
+ *  获取view名字作为ClassName
+ **/
++ (NSString *)getClassName:(NSString *)str
+{
+    NSString *temp = [str stringByReplacingOccurrencesOfString:@" " withString:@""];
+    temp = [temp stringByReplacingOccurrencesOfString:@"\r" withString:@""];
+    temp = [temp stringByReplacingOccurrencesOfString:@"\n" withString:@""];
+    temp=[temp stringByReplacingOccurrencesOfString:@"("withString:@""];
+    temp=[temp stringByReplacingOccurrencesOfString:@")"withString:@""];
+    NSArray *className = [temp componentsSeparatedByString:@","];
+    return [className objectAtIndex:0];
 }
+
+
+
+
+///**
+//*  发送内存泄漏数据到测试平台
+//**/
+//+ (void)sendLeakResult:(NSDictionary *)params{
+//    // 请求头
+//    // 请求参数字典
+//    NSLog(@"发送请求url=%@,params=%@",leakSavePath,params);
+//
+//    AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
+//
+//    NSMutableURLRequest *request = [[AFJSONRequestSerializer serializer] requestWithMethod:@"POST" URLString:leakSavePath parameters:params error:nil];
+//    request.timeoutInterval = 10.f;
+//    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+//    [request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
+//
+//    NSURLSessionDataTask *task = [manager dataTaskWithRequest:request completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
+//        NSLog(@"-----leak responseObject-----",responseObject);
+//        NSHTTPURLResponse * responses = (NSHTTPURLResponse *)task.response;
+//        if (!error && responses.statusCode == 200) {
+//            if ([responseObject isKindOfClass:[NSDictionary class]]) {
+//                // 请求成功数据处理
+//                NSString *codeStr = responseObject[@"code"];
+//                if (codeStr == 0){
+//                     NSLog(@"-----leak data send success!-----");
+//                }
+//            } else {
+//
+//            }
+//        } else {
+//            NSLog(@"请求失败error=%@", error);
+//        }
+//    }];
+//
+//}
+
+
+
+
 
 
 @end
