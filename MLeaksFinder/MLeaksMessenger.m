@@ -34,7 +34,7 @@ static NSString * leakSavePath =  @"https://backend.luojilab.com/leak/leaksave";
                                                            delegate:delegate
                                                   cancelButtonTitle:@"OK"
                                                   otherButtonTitles:additionalButtonTitle, nil];
-    [alertViewTemp show];
+    //[alertViewTemp show];
     //弹出alert提示
     alertView = alertViewTemp;
     
